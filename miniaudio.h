@@ -16187,7 +16187,7 @@ static void ma_thread_wait__posix(ma_thread* pThread)
 static ma_result ma_mutex_init__posix(ma_mutex* pMutex)
 {
     int result;
-    
+
     if (pMutex == NULL) {
         return MA_INVALID_ARGS;
     }
@@ -31784,13 +31784,16 @@ References
 #ifdef MA_HAS_COREAUDIO
 #include <TargetConditionals.h>
 
-#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE == 1
+#if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE == 1) || (defined(TARGET_OS_VISION) && TARGET_OS_VISION == 1)
     #define MA_APPLE_MOBILE
     #if defined(TARGET_OS_TV) && TARGET_OS_TV == 1
         #define MA_APPLE_TV
     #endif
     #if defined(TARGET_OS_WATCH) && TARGET_OS_WATCH == 1
         #define MA_APPLE_WATCH
+    #endif
+    #if defined(TARGET_OS_VISION) && TARGET_OS_VISION == 1
+        #define MA_APPLE_VISION
     #endif
     #if __has_feature(objc_arc)
         #define MA_BRIDGE_TRANSFER  __bridge_transfer
