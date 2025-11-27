@@ -34435,6 +34435,21 @@ static ma_result ma_find_best_format__coreaudio(ma_context* pContext, AudioObjec
     ma_bool32 hasSupportedFormat;
     UInt32 iFormat;
 
+    /*
+    SHARDS FIX: If pOrigFormat already has the desired channel count (or we don't care about channels),
+    use it directly. This handles aggregate devices correctly, where stream enumeration only returns
+    formats from the first sub-device. The AudioUnit's current format (pOrigFormat) is authoritative.
+    */
+    desiredChannelCount = channels;
+    if (desiredChannelCount == 0) {
+        desiredChannelCount = pOrigFormat->mChannelsPerFrame;
+    }
+
+    if (pOrigFormat->mChannelsPerFrame == desiredChannelCount) {
+        *pFormat = *pOrigFormat;
+        return MA_SUCCESS;
+    }
+
     result = ma_get_AudioObject_stream_descriptions(pContext, deviceObjectID, deviceType, &deviceFormatDescriptionCount, &pDeviceFormatDescriptions);
     if (result != MA_SUCCESS) {
         return result;
@@ -34445,10 +34460,7 @@ static ma_result ma_find_best_format__coreaudio(ma_context* pContext, AudioObjec
         desiredSampleRate = (ma_uint32)pOrigFormat->mSampleRate;
     }
 
-    desiredChannelCount = channels;
-    if (desiredChannelCount == 0) {
-        desiredChannelCount = pOrigFormat->mChannelsPerFrame;
-    }
+    /* desiredChannelCount already set above */
 
     desiredFormat = format;
     if (desiredFormat == ma_format_unknown) {
